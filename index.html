@@ -1,0 +1,74 @@
+<!--Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.-->
+<!--SPDX-License-Identifier: MIT-0-->
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="connect-streams-min.js"></script>
+    <script src="amazon-connect-chat.js"></script>
+</head>
+<body>
+<h1> Amazon Connect </h1>
+<h2> Screenpop Example </h1>
+<div id="containerDiv" ></div>
+<script>
+connect.core.initCCP(containerDiv, {
+    ccpUrl:        'https://mtthman.my.connect.aws/connect/ccp-v2/',       // POPUP
+    // ccpUrl:        'https://mtthman.my.connect.aws/connect/ccp#/',        // FAILS FOR CHATS
+    loginPopup:    true,          /*optional, default TRUE*/
+    softphone:     {              /*optional*/
+        allowFramedSoftphone: true
+    },
+    region: "us-east-1"
+});
+connect.ChatSession.setGlobalConfig({
+  loggerConfig: { // optional, the logging configuration. If omitted, no logging occurs
+    logger: { // optional, a logger object implementation
+      debug: (msg) => console.debug(msg), // REQUIRED, can be any function
+      info: (msg) => console.info(msg), // REQUIRED, can be any function
+      warn: (msg) => console.warn(msg), // REQUIRED, can be any function
+      error: (msg) => console.error(msg) // REQUIRED, can be any function
+    },
+    level: connect.ChatSession.LogLevel.DEBUG, // optional, defaults to: `connect.ChatSession.LogLevel.INFO`
+  },
+  region: "us-east-1", // optional, defaults to: "us-west-2"
+});
+// connect.ChatSession.onConnectionEstablished(event => {
+//     console.log(`CHAT SESSION: ${event}`)
+// })
+connect.contact(function(contact) {
+
+        contact.onIncoming(function(contact) {
+            console.log(`INCOMING: ${contact.getContactId()}`)
+        });
+
+        contact.onRefresh(function(contact) {
+        });
+
+        contact.onAccepted(async () => {
+            const cnn = contact.getConnections().find(cnn => cnn.getType() === connect.ConnectionType.AGENT);
+
+            const agentChatSession = await cnn.getMediaController();
+        });
+
+        contact.onEnded(function() {
+        });
+
+        contact.onConnected(function() {
+                console.log(`onConnected(${contact.getContactId()})`);
+                var type = contact.getType();
+                console.log(`TYPE: ${type}`);
+                // var attributeMap = contact.getAttributes();
+                // var name = JSON.stringify(attributeMap["name"]["value"]);
+                // var phone = JSON.stringify(attributeMap["phoneNumber"]["value"]);
+                // var account = JSON.stringify(attributeMap["accountNumber"]["value"]);
+                // console.log(name);
+                // console.log(phone);
+                // console.log(account);
+                // window.alert("Customer's name: " + name + "\nCustomer's phone #: " + phone + "\nCustomer's account #: " + account);
+
+        });
+});
+</script>
+</body>
+</html>
